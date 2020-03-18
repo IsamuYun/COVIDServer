@@ -233,10 +233,9 @@ if __name__ == '__main__':
     deathUrl = ""
     recoveryUrl = ""
     dropTimeSeries()
-    #importConfirmedData()
-    #importDeathData()
-    #importRecoveryData()
-
+    importConfirmedData()
+    importDeathData()
+    importRecoveryData()
     importDXYData()
     
     
