@@ -4,8 +4,7 @@ import urllib3
 from datetime import datetime
 
 mongo_client = MongoClient('mongodb://127.0.0.1:27017')
-
-#mongo_client = MongoClient('mongodb://%s:%s@127.0.0.1:27017' % ("root", "1234zlyc"))
+# mongo_client = MongoClient('mongodb://%s:%s@127.0.0.1:27017' % ("root", "1234zlyc"))
 
 db = mongo_client["COVID19-DB"]
 
@@ -190,8 +189,8 @@ def parseData(csvRow):
         csvRow[17] = 0
     if csvRow[18] == '':
         csvRow[18] = 0
-    
-    updateDate = datetime.fromisoformat(csvRow[11])
+    updateDate = datetime.strptime(csvRow[11], "YYYY-MM-DD HH:MM:SS")
+    #updateDate = datetime.fromisoformat(csvRow[11])
     data = {
         "country": csvRow[3],
         "province": csvRow[5],
