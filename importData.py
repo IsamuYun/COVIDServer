@@ -3,8 +3,7 @@ import csv
 import urllib3
 from datetime import datetime
 
-mongo_client = MongoClient('mongodb://127.0.0.1:27017')
-# mongo_client = MongoClient('mongodb://%s:%s@127.0.0.1:27017' % ("root", "1234zlyc"))
+# mongo_client = MongoClient('mongodb://127.0.0.1:27017')
 
 db = mongo_client["COVID19-DB"]
 
@@ -151,7 +150,7 @@ def updateRecoveryData(province, country, latitude, longitude, month, day, count
         cdc_ts.insert_one(data)
 
 def dropTimeSeries():
-    # cdc_ts.drop()
+    cdc_ts.drop()
     dxy_ts.drop()
 
 def importDXYData():
@@ -189,8 +188,7 @@ def parseData(csvRow):
         csvRow[17] = 0
     if csvRow[18] == '':
         csvRow[18] = 0
-    updateDate = datetime.strptime(csvRow[11], "YYYY-MM-DD HH:MM:SS")
-    #updateDate = datetime.fromisoformat(csvRow[11])
+    updateDate = datetime.fromisoformat(csvRow[11])
     data = {
         "country": csvRow[3],
         "province": csvRow[5],
@@ -233,9 +231,9 @@ def insertDXYData(data):
 
 if __name__ == '__main__':
     dropTimeSeries()
-    #importConfirmedData()
-    #importDeathData()
-    #importRecoveryData()
+    importConfirmedData()
+    importDeathData()
+    importRecoveryData()
     importDXYData()
     
     
