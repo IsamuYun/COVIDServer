@@ -4,6 +4,11 @@ import urllib3
 from datetime import datetime
 
 # mongo_client = MongoClient('mongodb://127.0.0.1:27017')
+mongo_client = MongoClient('127.0.0.1:27017',
+                            username='ruser',
+                            password='flzx3qc',
+                            authSource='COVID19-DB',
+                            authMechanism='SCRAM-SHA-256')
 
 db = mongo_client["COVID19-DB"]
 
