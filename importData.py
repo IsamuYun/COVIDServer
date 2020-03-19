@@ -1,9 +1,10 @@
 from pymongo import MongoClient
 import csv
 import urllib3
-import datetime
+from datetime import datetime
 
-mongo_client = MongoClient('127.0.0.1', 27017)
+mongo_client = MongoClient('mongodb://%s:%s@127.0.0.1:27017' % ("root", "1234zlyc"))
+
 db = mongo_client["COVID19-DB"]
 
 cdc_ts = db["CDC-TimeSeries"]
@@ -55,10 +56,10 @@ def insertConfirmedData(province, country, latitude, longitude, month, day, coun
         "Latitude": latitude,
         "Longitude": longitude,
         "Confirmed": count,
-        "Date": datetime.datetime(2020, month, day, 0, 0, 0),
+        "Date": datetime(2020, month, day, 0, 0, 0),
     }
-    start = datetime.datetime(2020, month, day, 0, 0, 0)
-    end = datetime.datetime(2020, month, day, 23, 59, 59)
+    start = datetime(2020, month, day, 0, 0, 0)
+    end = datetime(2020, month, day, 23, 59, 59)
     doc = cdc_ts.find_one_and_update({"$and": [{"Date": {'$gte': start, '$lt': end}},
                                     {"Province/State": {"$eq": province}},
                                     {"Country/Region": {"$eq": country}}]}, 
@@ -97,11 +98,11 @@ def updateDeathData(province, country, latitude, longitude, month, day, count):
         "Latitude": latitude,
         "Longitude": longitude,
         "Death": count,
-        "Date": datetime.datetime(2020, month, day, 0, 0, 0),
+        "Date": datetime(2020, month, day, 0, 0, 0),
     }
 
-    start = datetime.datetime(2020, month, day, 0, 0, 0)
-    end = datetime.datetime(2020, month, day, 23, 59, 59)
+    start = datetime(2020, month, day, 0, 0, 0)
+    end = datetime(2020, month, day, 23, 59, 59)
     doc = cdc_ts.find_one_and_update({"$and": [{"Date": {'$gte': start, '$lt': end}},
                                     {"Province/State": {"$eq": province}},
                                     {"Country/Region": {"$eq": country}}]}, 
@@ -136,11 +137,11 @@ def updateRecoveryData(province, country, latitude, longitude, month, day, count
         "Latitude": latitude,
         "Longitude": longitude,
         "Recovery": count,
-        "Date": datetime.datetime(2020, month, day, 0, 0, 0),
+        "Date": datetime(2020, month, day, 0, 0, 0),
     }
 
-    start = datetime.datetime(2020, month, day, 0, 0, 0)
-    end = datetime.datetime(2020, month, day, 23, 59, 59)
+    start = datetime(2020, month, day, 0, 0, 0)
+    end = datetime(2020, month, day, 23, 59, 59)
     doc = cdc_ts.find_one_and_update({"$and": [{"Date": {'$gte': start, '$lt': end}},
                                     {"Province/State": {"$eq": province}},
                                     {"Country/Region": {"$eq": country}}]}, 
@@ -188,7 +189,7 @@ def parseData(csvRow):
     if csvRow[18] == '':
         csvRow[18] = 0
     
-    updateDate = datetime.datetime.fromisoformat(csvRow[11])
+    updateDate = datetime.fromisoformat(csvRow[11])
     data = {
         "country": csvRow[3],
         "province": csvRow[5],
@@ -210,10 +211,10 @@ def parseData(csvRow):
 def insertDXYData(data):
     if data is None:
         return False
-    date = data.get("updateDate", datetime.datetime.utcnow())
+    date = data.get("updateDate", "")
     
-    start = datetime.datetime(date.year, date.month, date.day, 0, 0, 0)
-    end = datetime.datetime(date.year, date.month, date.day, 23, 59, 59)
+    start = datetime(date.year, date.month, date.day, 0, 0, 0)
+    end = datetime(date.year, date.month, date.day, 23, 59, 59)
 
     doc = dxy_ts.find_one({"$and": [{"updateDate": {'$gte': start, '$lt': end}},
                                 {"province": {"$eq": data.get("province", "")}},
@@ -230,12 +231,10 @@ def insertDXYData(data):
         return False
 
 if __name__ == '__main__':
-    deathUrl = ""
-    recoveryUrl = ""
     dropTimeSeries()
-    importConfirmedData()
-    importDeathData()
-    importRecoveryData()
+    #importConfirmedData()
+    #importDeathData()
+    #importRecoveryData()
     importDXYData()
     
     
