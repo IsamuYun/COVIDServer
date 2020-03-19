@@ -189,8 +189,8 @@ def parseData(csvRow):
         csvRow[17] = 0
     if csvRow[18] == '':
         csvRow[18] = 0
-    
-    updateDate = datetime.fromisoformat(csvRow[11])
+    updateDate = datetime.strptime(csvRow[11], "YYYY-MM-DD HH:MM:SS")
+    #updateDate = datetime.fromisoformat(csvRow[11])
     data = {
         "country": csvRow[3],
         "province": csvRow[5],
