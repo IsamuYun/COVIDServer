@@ -152,7 +152,7 @@ def updateRecoveryData(province, country, latitude, longitude, month, day, count
         cdc_ts.insert_one(data)
 
 def dropTimeSeries():
-    cdc_ts.drop()
+    # cdc_ts.drop()
     dxy_ts.drop()
 
 def importDXYData():
