@@ -17,7 +17,7 @@ dxy_ts = db["DXY-TimeSeries"]
 
 def importConfirmedData():
     confirmedUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
-    manager = urllib3.PoolManager(3)
+    manager = urllib3.PoolManager(10)
     response = manager.request('GET', confirmedUrl)
 
     reader = csv.reader(response.data.decode('utf-8').splitlines())
@@ -76,7 +76,7 @@ def insertConfirmedData(province, country, latitude, longitude, month, day, coun
 
 def importDeathData():
     dataUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
-    manager = urllib3.PoolManager(3)
+    manager = urllib3.PoolManager(10)
     response = manager.request('GET', dataUrl)
 
     reader = csv.reader(response.data.decode('utf-8').splitlines())
@@ -114,10 +114,11 @@ def updateDeathData(province, country, latitude, longitude, month, day, count):
                                     {"$set": {"Death": count}})
     if doc is None:
         cdc_ts.insert_one(data)
+    print("Death data inserted")
 
 def importRecoveryData():
     dataUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
-    manager = urllib3.PoolManager(3)
+    manager = urllib3.PoolManager(10)
     response = manager.request('GET', dataUrl)
 
     reader = csv.reader(response.data.decode('utf-8').splitlines())
@@ -185,15 +186,15 @@ def parseData(csvRow):
         csvRow[9] = 0
     if csvRow[10] == '':
         csvRow[10] = 0
+    if csvRow[14] == '':
+        csvRow[14] = 0
     if csvRow[15] == '':
         csvRow[15] = 0
     if csvRow[16] == '':
         csvRow[16] = 0
     if csvRow[17] == '':
         csvRow[17] = 0
-    if csvRow[18] == '':
-        csvRow[18] = 0
-    updateDate = datetime.fromisoformat(csvRow[11])
+    updateDate = datetime.fromisoformat(csvRow[18])
     data = {
         "country": csvRow[3],
         "province": csvRow[5],
@@ -202,13 +203,13 @@ def parseData(csvRow):
         "provinceSuspected": csvRow[8],
         "provinceRecoveryed": csvRow[9],
         "provinceDeaths": csvRow[10],
+        "city": csvRow[12],
+        "cityZipCode": csvRow[13],
+        "cityConfirmed": csvRow[14],
+        "citySuspected": csvRow[15],
+        "cityRecoveryed": csvRow[16],
+        "cityDeaths": csvRow[17],
         "updateDate": updateDate,
-        "city": csvRow[13],
-        "cityZipCode": csvRow[14],
-        "cityConfirmed": csvRow[15],
-        "citySuspected": csvRow[16],
-        "cityRecoveryed": csvRow[17],
-        "cityDeaths": csvRow[18]
     }
     return data
 
