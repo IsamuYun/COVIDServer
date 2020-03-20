@@ -29,7 +29,6 @@ def importCSV():
     content = request.get_json()
     country = content.get("country", "")
     province = content.get("province", "")
-    print("Country: " + country + " Province: " + province)
     dateList = []
     confirmedList = []
     deathsList = []
@@ -74,4 +73,4 @@ def importCSV():
     return jsonify(node)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=False, host='0.0.0.0')

@@ -15,9 +15,11 @@ db = mongo_client["COVID19-DB"]
 cdc_ts = db["CDC-TimeSeries"]
 dxy_ts = db["DXY-TimeSeries"]
 
+manager = urllib3.PoolManager(10)
+
 def importConfirmedData():
     confirmedUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
-    manager = urllib3.PoolManager(10)
+    
     response = manager.request('GET', confirmedUrl)
 
     reader = csv.reader(response.data.decode('utf-8').splitlines())
@@ -26,7 +28,6 @@ def importConfirmedData():
         return
     # Read the title and the date 
     titleInfo = next(reader)
-    #print(titleInfo)
     
     for row in reader:
         if len(row) <= 6:
@@ -76,7 +77,6 @@ def insertConfirmedData(province, country, latitude, longitude, month, day, coun
 
 def importDeathData():
     dataUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
-    manager = urllib3.PoolManager(10)
     response = manager.request('GET', dataUrl)
 
     reader = csv.reader(response.data.decode('utf-8').splitlines())
@@ -92,7 +92,7 @@ def importDeathData():
         for i in range(4, len(row)):
             month, day = getMonthAndDay(titleInfo, i)
             updateDeathData(row[0], row[1], row[2], row[3], month, day, row[i])
-
+    print("Deaths data imported")
     
 
 def updateDeathData(province, country, latitude, longitude, month, day, count):
@@ -114,11 +114,11 @@ def updateDeathData(province, country, latitude, longitude, month, day, count):
                                     {"$set": {"Death": count}})
     if doc is None:
         cdc_ts.insert_one(data)
-    print("Death data inserted")
+    
 
 def importRecoveryData():
     dataUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
-    manager = urllib3.PoolManager(10)
+    #manager = urllib3.PoolManager(10)
     response = manager.request('GET', dataUrl)
 
     reader = csv.reader(response.data.decode('utf-8').splitlines())
@@ -134,6 +134,7 @@ def importRecoveryData():
         for i in range(4, len(row)):
             month, day = getMonthAndDay(titleInfo, i)
             updateRecoveryData(row[0], row[1], row[2], row[3], month, day, row[i])
+    print("Import recovered data is completed.")
 
 def updateRecoveryData(province, country, latitude, longitude, month, day, count):
     # Create an new node
@@ -161,7 +162,7 @@ def dropTimeSeries():
 
 def importDXYData():
     url = "https://raw.githubusercontent.com/BlankerL/DXY-COVID-19-Data/master/csv/DXYArea.csv"
-    manager = urllib3.PoolManager(10)
+    # manager = urllib3.PoolManager(10)
     response = manager.request('GET', url)
 
     reader = csv.reader(response.data.decode('utf-8').splitlines())
