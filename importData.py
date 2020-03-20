@@ -236,10 +236,10 @@ def insertDXYData(data):
         return False
 
 if __name__ == '__main__':
-    dropTimeSeries()
-    importConfirmedData()
-    importDeathData()
-    importRecoveryData()
+   # dropTimeSeries()
+   # importConfirmedData()
+   # importDeathData()
+   # importRecoveryData()
     importDXYData()
     
     
