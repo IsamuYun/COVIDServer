@@ -160,7 +160,7 @@ def dropTimeSeries():
 
 def importDXYData():
     url = "https://raw.githubusercontent.com/BlankerL/DXY-COVID-19-Data/master/csv/DXYArea.csv"
-    manager = urllib3.PoolManager(3)
+    manager = urllib3.PoolManager(10)
     response = manager.request('GET', url)
 
     reader = csv.reader(response.data.decode('utf-8').splitlines())
