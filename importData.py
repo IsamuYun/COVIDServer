@@ -2,6 +2,7 @@ from pymongo import MongoClient
 import csv
 import urllib3
 from datetime import datetime
+import time
 
 # mongo_client = MongoClient('mongodb://127.0.0.1:27017')
 mongo_client = MongoClient('127.0.0.1:27017',
@@ -21,7 +22,7 @@ def importConfirmedData():
     confirmedUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
     
     response = manager.request('GET', confirmedUrl)
-
+    time.sleep(10)
     reader = csv.reader(response.data.decode('utf-8').splitlines())
     if reader is None:
         print("CSV File Error")
@@ -37,7 +38,7 @@ def importConfirmedData():
             month, day = getMonthAndDay(titleInfo, i)
             insertConfirmedData(row[0], row[1], row[2], row[3], month, day, row[i])
     
-    print("Import data successful")
+    print("Import confirmed data is completed.")
 
 def getMonthAndDay(titleInfo, index):
     month = 0
@@ -72,13 +73,11 @@ def insertConfirmedData(province, country, latitude, longitude, month, day, coun
                                     {"$set": {"Confirmed": count}})
     if doc is None:
         cdc_ts.insert_one(data)
-        print("Insert confirm data")
-    
 
 def importDeathData():
     dataUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
     response = manager.request('GET', dataUrl)
-
+    time.sleep(10)
     reader = csv.reader(response.data.decode('utf-8').splitlines())
     if reader is None:
         print("CSV File Error")
@@ -92,7 +91,7 @@ def importDeathData():
         for i in range(4, len(row)):
             month, day = getMonthAndDay(titleInfo, i)
             updateDeathData(row[0], row[1], row[2], row[3], month, day, row[i])
-    print("Deaths data imported")
+    print("Import deaths data is completed.")
     
 
 def updateDeathData(province, country, latitude, longitude, month, day, count):
@@ -120,7 +119,7 @@ def importRecoveryData():
     dataUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
     #manager = urllib3.PoolManager(10)
     response = manager.request('GET', dataUrl)
-
+    time.sleep(10)
     reader = csv.reader(response.data.decode('utf-8').splitlines())
     if reader is None:
         print("CSV File Error")
@@ -164,7 +163,7 @@ def importDXYData():
     url = "https://raw.githubusercontent.com/BlankerL/DXY-COVID-19-Data/master/csv/DXYArea.csv"
     # manager = urllib3.PoolManager(10)
     response = manager.request('GET', url)
-
+    time.sleep(10)
     reader = csv.reader(response.data.decode('utf-8').splitlines())
     if reader is None:
         print("DingXiangYuan CSV File Error")
@@ -174,6 +173,8 @@ def importDXYData():
     for row in reader:
         data = parseData(row)
         insertDXYData(data)
+
+    print("Import DXY data is completed.")
     
 # Parse the csv row line to data
 def parseData(csvRow):
@@ -233,14 +234,14 @@ def insertDXYData(data):
         dxy_ts.insert_one(data)
         return True
     else:
-        print("dxy have the record already")
+        
         return False
 
 if __name__ == '__main__':
-   # dropTimeSeries()
-   # importConfirmedData()
-   # importDeathData()
-   # importRecoveryData()
+    dropTimeSeries()
+    importConfirmedData()
+    importDeathData()
+    importRecoveryData()
     importDXYData()
     
     
