@@ -178,39 +178,62 @@ def importDXYData():
     
 # Parse the csv row line to data
 def parseData(csvRow):
+    COUNTRY_NAME = 3
+    PROVINCE_NAME = 5
+    PROVINCE_ZIPCODE = 6
+    PROVINCE_CONFIRMED = 7
+    PROVINCE_SUSPECTED = 8
+    PROVINCE_RECOVERYED = 9
+    PROVINCE_DEATHS = 10
+    CITY_NAME = 12
+    CITY_ZIPCODE = 13
+    CITY_CONFIRMED = 14
+    CITY_SUSPECTED = 15
+    CITY_RECOVERYED = 16
+    CITY_DEATHS = 17
+    UPDATE_TIME = 18
     if csvRow is None or len(csvRow) < 19:
         return None
-    if csvRow[7] == '':
-        csvRow[7] = 0
-    if csvRow[8] == '':
-        csvRow[8] = 0
-    if csvRow[9] == '':
-        csvRow[9] = 0
-    if csvRow[10] == '':
-        csvRow[10] = 0
-    if csvRow[14] == '':
-        csvRow[14] = 0
-    if csvRow[15] == '':
-        csvRow[15] = 0
-    if csvRow[16] == '':
-        csvRow[16] = 0
-    if csvRow[17] == '':
-        csvRow[17] = 0
-    updateDate = datetime.fromisoformat(csvRow[18])
+    if csvRow[PROVINCE_CONFIRMED] == '':
+        csvRow[PROVINCE_CONFIRMED] = 0
+    if csvRow[PROVINCE_SUSPECTED] == '':
+        csvRow[PROVINCE_SUSPECTED] = 0
+    if csvRow[PROVINCE_RECOVERYED] == '':
+        csvRow[PROVINCE_RECOVERYED] = 0
+    if csvRow[PROVINCE_DEATHS] == '':
+        csvRow[PROVINCE_DEATHS] = 0
+    if csvRow[CITY_CONFIRMED] == '':
+        csvRow[CITY_CONFIRMED] = 0
+    if csvRow[CITY_SUSPECTED] == '':
+        csvRow[CITY_SUSPECTED] = 0
+    if csvRow[CITY_RECOVERYED] == '':
+        csvRow[CITY_RECOVERYED] = 0
+    if csvRow[CITY_DEATHS] == '':
+        csvRow[CITY_DEATHS] = 0
+    
+    updateDate = ''
+    try:
+        if csvRow[UPDATE_TIME] != '':
+            updateDate = datetime.fromisoformat(csvRow[UPDATE_TIME])
+        else:
+            updateDate = datetime.utcnow()
+    except ValueError:
+        updateDate = datetime.utcnow()
+    
     data = {
-        "country": csvRow[3],
-        "province": csvRow[5],
-        "provinceZipCode": csvRow[6],
-        "provinceConfirmed": csvRow[7],
-        "provinceSuspected": csvRow[8],
-        "provinceRecoveryed": csvRow[9],
-        "provinceDeaths": csvRow[10],
-        "city": csvRow[12],
-        "cityZipCode": csvRow[13],
-        "cityConfirmed": csvRow[14],
-        "citySuspected": csvRow[15],
-        "cityRecoveryed": csvRow[16],
-        "cityDeaths": csvRow[17],
+        "country": csvRow[COUNTRY_NAME],
+        "province": csvRow[PROVINCE_NAME],
+        "provinceZipCode": csvRow[PROVINCE_ZIPCODE],
+        "provinceConfirmed": csvRow[PROVINCE_CONFIRMED],
+        "provinceSuspected": csvRow[PROVINCE_SUSPECTED],
+        "provinceRecoveryed": csvRow[PROVINCE_RECOVERYED],
+        "provinceDeaths": csvRow[PROVINCE_DEATHS],
+        "city": csvRow[CITY_NAME],
+        "cityZipCode": csvRow[CITY_ZIPCODE],
+        "cityConfirmed": csvRow[CITY_CONFIRMED],
+        "citySuspected": csvRow[CITY_SUSPECTED],
+        "cityRecoveryed": csvRow[CITY_RECOVERYED],
+        "cityDeaths": csvRow[CITY_DEATHS],
         "updateDate": updateDate,
     }
     return data
