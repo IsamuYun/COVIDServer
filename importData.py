@@ -185,13 +185,13 @@ def parseData(csvRow):
     PROVINCE_SUSPECTED = 8
     PROVINCE_RECOVERYED = 9
     PROVINCE_DEATHS = 10
-    CITY_NAME = 13
-    CITY_ZIPCODE = 14
-    CITY_CONFIRMED = 15
-    CITY_SUSPECTED = 16
-    CITY_RECOVERYED = 17
-    CITY_DEATHS = 18
-    UPDATE_TIME = 11
+    CITY_NAME = 12
+    CITY_ZIPCODE = 13
+    CITY_CONFIRMED = 14
+    CITY_SUSPECTED = 15
+    CITY_RECOVERYED = 16
+    CITY_DEATHS = 17
+    UPDATE_TIME = 18
     if csvRow is None or len(csvRow) < 19:
         return None
     if csvRow[PROVINCE_CONFIRMED] == '':
