@@ -4,12 +4,12 @@ import urllib3
 from datetime import datetime
 import time
 
-# mongo_client = MongoClient('mongodb://127.0.0.1:27017')
-mongo_client = MongoClient('127.0.0.1:27017',
-                            username='ruser',
-                            password='flzx3qc',
-                            authSource='COVID19-DB',
-                            authMechanism='SCRAM-SHA-256')
+mongo_client = MongoClient('mongodb://127.0.0.1:27017')
+#mongo_client = MongoClient('127.0.0.1:27017',
+#                            username='ruser',
+#                            password='flzx3qc',
+#                            authSource='COVID19-DB',
+#                            authMechanism='SCRAM-SHA-256')
 
 db = mongo_client["COVID19-DB"]
 
@@ -19,7 +19,7 @@ dxy_ts = db["DXY-TimeSeries"]
 manager = urllib3.PoolManager(10)
 
 def importConfirmedData():
-    confirmedUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
+    confirmedUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
     
     response = manager.request('GET', confirmedUrl)
     time.sleep(10)
@@ -75,7 +75,7 @@ def insertConfirmedData(province, country, latitude, longitude, month, day, coun
         cdc_ts.insert_one(data)
 
 def importDeathData():
-    dataUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
+    dataUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
     response = manager.request('GET', dataUrl)
     time.sleep(10)
     reader = csv.reader(response.data.decode('utf-8').splitlines())
@@ -116,7 +116,7 @@ def updateDeathData(province, country, latitude, longitude, month, day, count):
     
 
 def importRecoveryData():
-    dataUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
+    dataUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv"
     #manager = urllib3.PoolManager(10)
     response = manager.request('GET', dataUrl)
     time.sleep(10)
