@@ -60,9 +60,9 @@ def importCSV():
             date_obj = update_date.date()
             date_str = date_obj.isoformat()
             dateList.append(date_str)
-            confirmedList.append(doc.get("Confirmed"))
-            deathsList.append(doc.get("Death"))
-            recoveredList.append(doc.get("Recovery"))
+            confirmedList.append(doc.get("Confirmed", 0))
+            deathsList.append(doc.get("Death", 0))
+            recoveredList.append(doc.get("Recovery", 0))
     
     node = {
         'country': country,

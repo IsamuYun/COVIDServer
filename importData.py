@@ -5,6 +5,7 @@ from datetime import datetime
 import time
 
 mongo_client = MongoClient('mongodb://127.0.0.1:27017')
+
 #mongo_client = MongoClient('127.0.0.1:27017',
 #                            username='ruser',
 #                            password='flzx3qc',
@@ -17,28 +18,6 @@ cdc_ts = db["CDC-TimeSeries"]
 dxy_ts = db["DXY-TimeSeries"]
 
 manager = urllib3.PoolManager(10)
-
-def importConfirmedData():
-    confirmedUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
-    
-    response = manager.request('GET', confirmedUrl)
-    time.sleep(10)
-    reader = csv.reader(response.data.decode('utf-8').splitlines())
-    if reader is None:
-        print("CSV File Error")
-        return
-    # Read the title and the date 
-    titleInfo = next(reader)
-    
-    for row in reader:
-        if len(row) <= 6:
-            print("CSV File Structure Error")
-            break
-        for i in range(4, len(row)):
-            month, day = getMonthAndDay(titleInfo, i)
-            insertConfirmedData(row[0], row[1], row[2], row[3], month, day, row[i])
-    
-    print("Import confirmed data is completed.")
 
 def getMonthAndDay(titleInfo, index):
     month = 0
@@ -55,6 +34,31 @@ def getMonthAndDay(titleInfo, index):
     month = int(date[0])
     day = int(date[1])
     return (month, day)
+
+
+def importGlobalConfirmedData():
+    confirmedUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
+    
+    response = manager.request('GET', confirmedUrl)
+    time.sleep(10)
+    reader = csv.reader(response.data.decode('utf-8').splitlines())
+    if reader is None:
+        print("CSV File Error")
+        return
+    # Read the title and the date 
+    titleInfo = next(reader)
+    print("Import global confirmed data is start")
+    for row in reader:
+        if len(row) <= 6:
+            print("CSV File Structure Error")
+            break
+        for i in range(4, len(row)):
+            month, day = getMonthAndDay(titleInfo, i)
+            insertConfirmedData(row[0], row[1], row[2], row[3], month, day, row[i])
+    
+    print("Import confirmed data is completed.")
+
+
 
 def insertConfirmedData(province, country, latitude, longitude, month, day, count):
     data = {
@@ -74,7 +78,7 @@ def insertConfirmedData(province, country, latitude, longitude, month, day, coun
     if doc is None:
         cdc_ts.insert_one(data)
 
-def importDeathData():
+def importGlobalDeathData():
     dataUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
     response = manager.request('GET', dataUrl)
     time.sleep(10)
@@ -83,7 +87,7 @@ def importDeathData():
         print("CSV File Error")
         return
     titleInfo = next(reader)
-
+    print("Import global deaths data is starting")
     for row in reader:
         if len(row) <= 6:
             print("CSV File Structure Error")
@@ -91,7 +95,7 @@ def importDeathData():
         for i in range(4, len(row)):
             month, day = getMonthAndDay(titleInfo, i)
             updateDeathData(row[0], row[1], row[2], row[3], month, day, row[i])
-    print("Import deaths data is completed.")
+    print("Import global deaths data is completed.")
     
 
 def updateDeathData(province, country, latitude, longitude, month, day, count):
@@ -115,9 +119,8 @@ def updateDeathData(province, country, latitude, longitude, month, day, count):
         cdc_ts.insert_one(data)
     
 
-def importRecoveryData():
+def importGlobalRecoveryData():
     dataUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv"
-    #manager = urllib3.PoolManager(10)
     response = manager.request('GET', dataUrl)
     time.sleep(10)
     reader = csv.reader(response.data.decode('utf-8').splitlines())
@@ -133,7 +136,9 @@ def importRecoveryData():
         for i in range(4, len(row)):
             month, day = getMonthAndDay(titleInfo, i)
             updateRecoveryData(row[0], row[1], row[2], row[3], month, day, row[i])
-    print("Import recovered data is completed.")
+    print("Import Global recovered data is completed.")
+
+
 
 def updateRecoveryData(province, country, latitude, longitude, month, day, count):
     # Create an new node
@@ -155,13 +160,52 @@ def updateRecoveryData(province, country, latitude, longitude, month, day, count
     if doc is None:
         cdc_ts.insert_one(data)
 
+def importUSConfirmedData():
+    dataUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv"
+    response = manager.request('GET', dataUrl)
+    time.sleep(10)
+    reader = csv.reader(response.data.decode('utf-8').splitlines())
+    if reader is None:
+        print("CSV File Error")
+        return
+    titleInfo = next(reader)
+    print("Import US confirmed data is starting")
+    for row in reader:
+        if len(row) <= 6:
+            print("CSV File Structure Error")
+            break
+        for i in range(11, len(row)):
+            month, day = getMonthAndDay(titleInfo, i)
+            insertConfirmedData(row[6], row[7], row[8], row[9], month, day, row[i])
+    
+    print("Import US confirmed data is completed.")
+
+def importUSDeathsData():
+    dataUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv"
+    response = manager.request('GET', dataUrl)
+    time.sleep(10)
+    reader = csv.reader(response.data.decode('utf-8').splitlines())
+    if reader is None:
+        print("CSV File Error")
+        return
+    titleInfo = next(reader)
+    print("Import US deaths data is starting")
+    for row in reader:
+        if len(row) <= 6:
+            print("CSV File Structure Error")
+            break
+        for i in range(12, len(row)):
+            month, day = getMonthAndDay(titleInfo, i)
+            updateDeathData(row[6], row[7], row[8], row[9], month, day, row[i])
+    
+    print("Import US deaths data is completed.")
+
 def dropTimeSeries():
     cdc_ts.drop()
     dxy_ts.drop()
 
 def importDXYData():
     url = "https://raw.githubusercontent.com/BlankerL/DXY-COVID-19-Data/master/csv/DXYArea.csv"
-    # manager = urllib3.PoolManager(10)
     response = manager.request('GET', url)
     time.sleep(10)
     reader = csv.reader(response.data.decode('utf-8').splitlines())
@@ -169,7 +213,7 @@ def importDXYData():
         print("DingXiangYuan CSV File Error")
         return
     title = next(reader)
-    
+    print("Import DXY data is starting")
     for row in reader:
         data = parseData(row)
         insertDXYData(data)
@@ -185,13 +229,13 @@ def parseData(csvRow):
     PROVINCE_SUSPECTED = 8
     PROVINCE_RECOVERYED = 9
     PROVINCE_DEATHS = 10
-    CITY_NAME = 12
-    CITY_ZIPCODE = 13
-    CITY_CONFIRMED = 14
-    CITY_SUSPECTED = 15
-    CITY_RECOVERYED = 16
-    CITY_DEATHS = 17
-    UPDATE_TIME = 18
+    CITY_NAME = 13
+    CITY_ZIPCODE = 14
+    CITY_CONFIRMED = 15
+    CITY_SUSPECTED = 16
+    CITY_RECOVERYED = 17
+    CITY_DEATHS = 18
+    UPDATE_TIME = 11
     if csvRow is None or len(csvRow) < 19:
         return None
     if csvRow[PROVINCE_CONFIRMED] == '':
@@ -262,9 +306,11 @@ def insertDXYData(data):
 
 if __name__ == '__main__':
     dropTimeSeries()
-    importConfirmedData()
-    importDeathData()
-    importRecoveryData()
+    importGlobalConfirmedData()
+    importGlobalDeathData()
+    importGlobalRecoveryData()
+    importUSConfirmedData()
+    importUSDeathsData()
     importDXYData()
     
     
