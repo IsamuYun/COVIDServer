@@ -163,7 +163,6 @@ def updateRecoveryData(province, country, latitude, longitude, month, day, count
 def importUSConfirmedData():
     dataUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv"
     response = manager.request('GET', dataUrl)
-    time.sleep(10)
     reader = csv.reader(response.data.decode('utf-8').splitlines())
     if reader is None:
         print("CSV File Error")
@@ -183,7 +182,6 @@ def importUSConfirmedData():
 def importUSDeathsData():
     dataUrl = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv"
     response = manager.request('GET', dataUrl)
-    time.sleep(10)
     reader = csv.reader(response.data.decode('utf-8').splitlines())
     if reader is None:
         print("CSV File Error")
@@ -202,6 +200,8 @@ def importUSDeathsData():
 
 def dropTimeSeries():
     cdc_ts.drop()
+
+def dropDXYTimeSeries():
     dxy_ts.drop()
 
 def importDXYData():
@@ -213,29 +213,65 @@ def importDXYData():
         print("DingXiangYuan CSV File Error")
         return
     title = next(reader)
+    fieldDict = getFieldIndex(title)
+    print(fieldDict)
     print("Import DXY data is starting")
     for row in reader:
-        data = parseData(row)
+        data = parseData(row, fieldDict)
         insertDXYData(data)
 
     print("Import DXY data is completed.")
-    
+
+# 由于网上的丁香园数据的字段位置一直在变化，编写一个字段和位置的解析器
+def getFieldIndex(titleRow):
+    fieldDict = {}
+    for i in range(len(titleRow)):
+        if titleRow[i] == 'countryEnglishName':
+            fieldDict['countryName'] = i
+        elif titleRow[i] == 'provinceEnglishName':
+            fieldDict['provinceName'] = i
+        elif titleRow[i] == 'province_zipCode':
+            fieldDict['provinceZipCode'] = i
+        elif titleRow[i] == 'province_confirmedCount':
+            fieldDict['provinceConfirmed'] = i
+        elif titleRow[i] == 'province_suspectedCount':
+            fieldDict['provinceSuspected'] = i
+        elif titleRow[i] == 'province_curedCount':
+            fieldDict['provinceRecoveryed'] = i
+        elif titleRow[i] == 'province_deadCount':
+            fieldDict['provinceDeaths'] = i
+        elif titleRow[i] == 'updateTime':
+            fieldDict['updateTime'] = i
+        elif titleRow[i] == 'cityEnglishName':
+            fieldDict['cityName'] = i
+        elif titleRow[i] == 'city_zipCode':
+            fieldDict['cityZipCode'] = i
+        elif titleRow[i] == 'city_confirmedCount':
+            fieldDict['cityConfirmed'] = i
+        elif titleRow[i] == 'city_suspectedCount':
+            fieldDict['citySuspected'] = i
+        elif titleRow[i] == 'city_curedCount':
+            fieldDict['cityRecoveryed'] = i
+        elif titleRow[i] == 'city_deadCount':
+            fieldDict['cityDeaths'] = i
+    return fieldDict
+
 # Parse the csv row line to data
-def parseData(csvRow):
-    COUNTRY_NAME = 3
-    PROVINCE_NAME = 5
-    PROVINCE_ZIPCODE = 6
-    PROVINCE_CONFIRMED = 7
-    PROVINCE_SUSPECTED = 8
-    PROVINCE_RECOVERYED = 9
-    PROVINCE_DEATHS = 10
-    CITY_NAME = 13
-    CITY_ZIPCODE = 14
-    CITY_CONFIRMED = 15
-    CITY_SUSPECTED = 16
-    CITY_RECOVERYED = 17
-    CITY_DEATHS = 18
-    UPDATE_TIME = 11
+def parseData(csvRow, fieldDict):
+    COUNTRY_NAME = fieldDict.get("countryName", 0)
+    PROVINCE_NAME = fieldDict.get("provinceName", 0)
+    PROVINCE_ZIPCODE = fieldDict.get("provinceZipCode", 0)
+    PROVINCE_CONFIRMED = fieldDict.get("provinceConfirmed", 0)
+    PROVINCE_SUSPECTED = fieldDict.get("provinceSuspected", 0)
+    PROVINCE_RECOVERYED = fieldDict.get("provinceRecoveryed", 0)
+    PROVINCE_DEATHS = fieldDict.get("provinceDeaths", 0)
+    CITY_NAME = fieldDict.get("cityName", 0)
+    CITY_ZIPCODE = fieldDict.get("cityZipCode", 0)
+    CITY_CONFIRMED = fieldDict.get("cityConfirmed", 0)
+    CITY_SUSPECTED = fieldDict.get("citySuspected", 0)
+    CITY_RECOVERYED = fieldDict.get("cityRecoveryed", 0)
+    CITY_DEATHS = fieldDict.get("cityDeaths", 0)
+    UPDATE_TIME = fieldDict.get("updateTime", 0)
     if csvRow is None or len(csvRow) < 19:
         return None
     if csvRow[PROVINCE_CONFIRMED] == '':
@@ -311,6 +347,7 @@ if __name__ == '__main__':
     importGlobalRecoveryData()
     importUSConfirmedData()
     importUSDeathsData()
+    dropDXYTimeSeries()
     importDXYData()
     
     
