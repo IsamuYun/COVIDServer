@@ -357,13 +357,13 @@ def insertDXYData(data):
         return False
 
 if __name__ == '__main__':
-    dropTimeSeries()
-    importGlobalConfirmedData()
-    importGlobalDeathData()
-    importGlobalRecoveryData()
-    importUSConfirmedData()
-    importUSDeathsData()
-    dropDXYTimeSeries()
-    importDXYData()
+    #dropTimeSeries()
+    #importGlobalConfirmedData()
+    #importGlobalDeathData()
+    #importGlobalRecoveryData()
+    #importUSConfirmedData()
+    #importUSDeathsData()
+    #dropDXYTimeSeries()
+    #importDXYData()
     
     
