@@ -216,8 +216,9 @@ def dropTimeSeries():
 
 def dropDXYTimeSeries():
     dxy_ts.drop()
-    cdc_ts.create_index([('country', pymongo.ASCENDING)])
-    cdc_ts.create_index([('province', pymongo.ASCENDING)])
+    dxy_ts.create_index([('country', pymongo.ASCENDING)])
+    dxy_ts.create_index([('province', pymongo.ASCENDING)])
+    dxy_ts.create_index([('updateDate', pymongo.ASCENDING)])
 
 def importDXYData():
     url = "https://raw.githubusercontent.com/BlankerL/DXY-COVID-19-Data/master/csv/DXYArea.csv"
