@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+import pymongo
 import csv
 import urllib3
 from datetime import datetime
@@ -48,22 +49,25 @@ def importGlobalConfirmedData():
     # Read the title and the date 
     titleInfo = next(reader)
     print("Import global confirmed data is start")
+    # 创建Index
+
     for row in reader:
         if len(row) <= 6:
             print("CSV File Structure Error")
             break
         for i in range(4, len(row)):
             month, day = getMonthAndDay(titleInfo, i)
-            insertConfirmedData(row[0], row[1], row[2], row[3], month, day, row[i])
+            insertConfirmedData(row[0], row[1], "", row[2], row[3], month, day, row[i])
     
     print("Import confirmed data is completed.")
 
 
 
-def insertConfirmedData(province, country, latitude, longitude, month, day, count):
+def insertConfirmedData(province, country, county, latitude, longitude, month, day, count):
     data = {
         "Province/State": province,
         "Country/Region": country,
+        "County/City": county,
         "Latitude": latitude,
         "Longitude": longitude,
         "Confirmed": count,
@@ -73,7 +77,8 @@ def insertConfirmedData(province, country, latitude, longitude, month, day, coun
     end = datetime(2020, month, day, 23, 59, 59)
     doc = cdc_ts.find_one_and_update({"$and": [{"Date": {'$gte': start, '$lt': end}},
                                     {"Province/State": {"$eq": province}},
-                                    {"Country/Region": {"$eq": country}}]}, 
+                                    {"Country/Region": {"$eq": country}},
+                                    {"County/City": {"$eq": county}}]}, 
                                     {"$set": {"Confirmed": count}})
     if doc is None:
         cdc_ts.insert_one(data)
@@ -94,15 +99,16 @@ def importGlobalDeathData():
             break
         for i in range(4, len(row)):
             month, day = getMonthAndDay(titleInfo, i)
-            updateDeathData(row[0], row[1], row[2], row[3], month, day, row[i])
+            updateDeathData(row[0], row[1], "", row[2], row[3], month, day, row[i])
     print("Import global deaths data is completed.")
     
 
-def updateDeathData(province, country, latitude, longitude, month, day, count):
+def updateDeathData(province, country, county, latitude, longitude, month, day, count):
     # Create an new node
     data = {
         "Province/State": province,
         "Country/Region": country,
+        "County/City": county,
         "Latitude": latitude,
         "Longitude": longitude,
         "Death": count,
@@ -113,7 +119,8 @@ def updateDeathData(province, country, latitude, longitude, month, day, count):
     end = datetime(2020, month, day, 23, 59, 59)
     doc = cdc_ts.find_one_and_update({"$and": [{"Date": {'$gte': start, '$lt': end}},
                                     {"Province/State": {"$eq": province}},
-                                    {"Country/Region": {"$eq": country}}]}, 
+                                    {"Country/Region": {"$eq": country}},
+                                    {"County/City": {"$eq": county}}]},  
                                     {"$set": {"Death": count}})
     if doc is None:
         cdc_ts.insert_one(data)
@@ -135,16 +142,17 @@ def importGlobalRecoveryData():
             break
         for i in range(4, len(row)):
             month, day = getMonthAndDay(titleInfo, i)
-            updateRecoveryData(row[0], row[1], row[2], row[3], month, day, row[i])
+            updateRecoveryData(row[0], row[1], "", row[2], row[3], month, day, row[i])
     print("Import Global recovered data is completed.")
 
 
 
-def updateRecoveryData(province, country, latitude, longitude, month, day, count):
+def updateRecoveryData(province, country, county, latitude, longitude, month, day, count):
     # Create an new node
     data = {
         "Province/State": province,
         "Country/Region": country,
+        "County/City": county,
         "Latitude": latitude,
         "Longitude": longitude,
         "Recovery": count,
@@ -155,7 +163,8 @@ def updateRecoveryData(province, country, latitude, longitude, month, day, count
     end = datetime(2020, month, day, 23, 59, 59)
     doc = cdc_ts.find_one_and_update({"$and": [{"Date": {'$gte': start, '$lt': end}},
                                     {"Province/State": {"$eq": province}},
-                                    {"Country/Region": {"$eq": country}}]}, 
+                                    {"Country/Region": {"$eq": country}},
+                                    {"County/City": {"$eq": county}}]},  
                                     {"$set": {"Recovery": count}})
     if doc is None:
         cdc_ts.insert_one(data)
@@ -175,7 +184,7 @@ def importUSConfirmedData():
             break
         for i in range(11, len(row)):
             month, day = getMonthAndDay(titleInfo, i)
-            insertConfirmedData(row[6], row[7], row[8], row[9], month, day, row[i])
+            insertConfirmedData(row[6], row[7], row[5], row[8], row[9], month, day, row[i])
     
     print("Import US confirmed data is completed.")
 
@@ -194,15 +203,21 @@ def importUSDeathsData():
             break
         for i in range(12, len(row)):
             month, day = getMonthAndDay(titleInfo, i)
-            updateDeathData(row[6], row[7], row[8], row[9], month, day, row[i])
+            updateDeathData(row[6], row[7], row[5], row[8], row[9], month, day, row[i])
     
     print("Import US deaths data is completed.")
 
 def dropTimeSeries():
     cdc_ts.drop()
+    cdc_ts.create_index([('Province/State', pymongo.ASCENDING)])
+    cdc_ts.create_index([('Country/Region', pymongo.ASCENDING)])
+    cdc_ts.create_index([('County/City', pymongo.ASCENDING)])
+    cdc_ts.create_index([('Date', pymongo.ASCENDING)])
 
 def dropDXYTimeSeries():
     dxy_ts.drop()
+    cdc_ts.create_index([('country', pymongo.ASCENDING)])
+    cdc_ts.create_index([('province', pymongo.ASCENDING)])
 
 def importDXYData():
     url = "https://raw.githubusercontent.com/BlankerL/DXY-COVID-19-Data/master/csv/DXYArea.csv"
